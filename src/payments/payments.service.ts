@@ -4,13 +4,12 @@ import Stripe from 'stripe';
 import { PaymentSessionDto } from './dto/paymentSession.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { NAST_SERVICE } from 'src/shared/constants/NATS_SERVICE';
+import { ORDERS_SERVICES_NAMES } from 'src/shared/entities/OrdersServicesNames';
 
 @Injectable()
 export class PaymentsService {
   private readonly stripe = new Stripe(envs.stripeSecret);
-  constructor(
-    @Inject(NAST_SERVICE) private readonly client: ClientProxy
-  ) {}
+  constructor(@Inject(NAST_SERVICE) private readonly client: ClientProxy) {}
   async createPaymentSession(paymentSessionDto: PaymentSessionDto) {
     const { currency, items, orderId } = paymentSessionDto;
     const lineItems = items.map((item) => {
@@ -51,11 +50,12 @@ export class PaymentsService {
       if (event.type === 'charge.succeeded') {
         const chargeSucceeded = event.data.object;
         // we will call our microservice soon
-        console.log({
+        const payload = {
           metadata: chargeSucceeded.metadata,
           orderId: chargeSucceeded.metadata.orderId,
           receive_payment: chargeSucceeded.receipt_url,
-        });
+        };
+        this.client.emit(ORDERS_SERVICES_NAMES.PAYMENT_SUCCEDED, payload);
       } else {
         console.log(`Event ${event.type} not handled`);
       }
