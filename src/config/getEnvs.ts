@@ -17,6 +17,7 @@ const getEnvVars = () => {
 
   return {
     port: envVars.PORT,
+    stripeSecret: envVars.STRIPE_SECRET,
   };
 };
 
