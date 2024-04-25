@@ -31,4 +31,19 @@ export class PaymentsService {
     });
     return session;
   }
+
+  async stripeWebhook(signature: string | string[], rawBody: any) {
+    try {
+      let event: Stripe.Event;
+      const endpointSecret =
+        'whsec_1f8a7d110228976caae81b3e913f4f5772d61f6146b950c59d34345db00026aa';
+      event = this.stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        endpointSecret,
+      );
+    } catch (error) {
+        throw new Error(error)
+    }
+  }
 }

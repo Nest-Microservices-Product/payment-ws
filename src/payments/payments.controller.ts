@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { PaymentSessionDto } from './dto/paymentSession.dto';
+import { Request, Response } from 'express';
 
 @Controller('payments')
 export class PaymentsController {
@@ -20,7 +21,7 @@ export class PaymentsController {
   }
 
   @Get('cancelled')
-  cancel() {
+  cancelled() {
     return {
       ok: false,
       message: 'Payment cancelled',
@@ -28,7 +29,17 @@ export class PaymentsController {
   }
 
   @Post('webhook')
-  async stripeWebHook() {
-    return 'stripe.webhook';
+  async stripeWebHook(@Req() req: Request, @Res() res: Response) {
+    try {
+      const signature = req.headers['stripe-signature'];
+      const rawBody = req['rawBody'];
+      const stripeResponse = await this.paymentsService.stripeWebhook(
+        signature,
+        rawBody,
+      );
+      return res.status(200).json(stripeResponse);
+    } catch (error) {
+      return res.status(400).send(`Webhook Error: ${error.message}`);
+    }
   }
 }
