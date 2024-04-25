@@ -51,7 +51,7 @@ export class PaymentsService {
         const chargeSucceeded = event.data.object;
         // we will call our microservice soon
         const payload = {
-          metadata: chargeSucceeded.metadata,
+          stripePaymentId: chargeSucceeded.id,
           orderId: chargeSucceeded.metadata.orderId,
           receive_payment: chargeSucceeded.receipt_url,
         };
