@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { envs } from 'src/config/getEnvs';
 import Stripe from 'stripe';
 import { PaymentSessionDto } from './dto/paymentSession.dto';
+import { ClientProxy } from '@nestjs/microservices';
+import { NAST_SERVICE } from 'src/shared/constants/NATS_SERVICE';
 
 @Injectable()
 export class PaymentsService {
   private readonly stripe = new Stripe(envs.stripeSecret);
+  constructor(
+    @Inject(NAST_SERVICE) private readonly client: ClientProxy
+  ) {}
   async createPaymentSession(paymentSessionDto: PaymentSessionDto) {
     const { currency, items, orderId } = paymentSessionDto;
     const lineItems = items.map((item) => {

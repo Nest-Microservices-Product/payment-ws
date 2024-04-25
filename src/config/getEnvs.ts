@@ -5,6 +5,7 @@ import { EnvVars } from './entities/EnvVars.entity';
 const getEnvVars = () => {
   const { error, value } = envSchema.validate({
     ...process.env,
+    NATS_SERVERS: process.env?.NATS_SERVERS.split(','),
   });
 
   if (error) {
@@ -20,7 +21,8 @@ const getEnvVars = () => {
     stripeSecret: envVars.STRIPE_SECRET,
     endpointSecret: envVars.ENDPOINT_SECRET,
     stripeSuccessUrl: envVars.STRIPE_SUCCESS_URL,
-    stripeCancelUrl: envVars.STRIPE_CANCEL_URL
+    stripeCancelUrl: envVars.STRIPE_CANCEL_URL,
+    natsServer: envVars.NATS_SERVERS,
   };
 };
 
