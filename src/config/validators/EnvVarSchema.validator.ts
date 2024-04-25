@@ -5,6 +5,8 @@ export const envSchema = joi
   .object<EnvVars>({
     PORT: joi.number().required(),
     STRIPE_SECRET: joi.string().required(),
-    ENDPOINT_SECRET : joi.string().required()
+    ENDPOINT_SECRET: joi.string().required(),
+    STRIPE_SUCCESS_URL: joi.string().required(),
+    STRIPE_CANCEL_URL: joi.string().required(),
   })
   .unknown(true);

@@ -18,7 +18,9 @@ const getEnvVars = () => {
   return {
     port: envVars.PORT,
     stripeSecret: envVars.STRIPE_SECRET,
-    endpointSecret: envVars.ENDPOINT_SECRET
+    endpointSecret: envVars.ENDPOINT_SECRET,
+    stripeSuccessUrl: envVars.STRIPE_SUCCESS_URL,
+    stripeCancelUrl: envVars.STRIPE_CANCEL_URL
   };
 };
 

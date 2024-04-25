@@ -7,7 +7,7 @@ import { PaymentSessionDto } from './dto/paymentSession.dto';
 export class PaymentsService {
   private readonly stripe = new Stripe(envs.stripeSecret);
   async createPaymentSession(paymentSessionDto: PaymentSessionDto) {
-    const { currency, items } = paymentSessionDto;
+    const { currency, items, orderId } = paymentSessionDto;
     const lineItems = items.map((item) => {
       return {
         price_data: {
@@ -22,38 +22,37 @@ export class PaymentsService {
     });
 
     const session = await this.stripe.checkout.sessions.create({
-      //in here we will put the orden id
-      payment_intent_data: {},
+      //in here we will put the order id
+      payment_intent_data: {
+        metadata: {
+          orderId: orderId,
+        },
+      },
       line_items: lineItems,
       mode: 'payment',
-      success_url: 'http://localhost:3003/payments/success',
-      cancel_url: 'http://localhost:3003/payments/cancelled',
+      success_url: envs.stripeSuccessUrl,
+      cancel_url: envs.stripeCancelUrl,
     });
     return session;
   }
 
   async stripeWebhook(signature: string | string[], rawBody: any) {
     try {
-      const endpointSecret = envs.endpointSecret;
       const event = this.stripe.webhooks.constructEvent(
         rawBody,
         signature,
-        endpointSecret,
+        envs.endpointSecret,
       );
-      switch (event.type) {
-        case 'charge.succeeded':
-          const chargeSucceeded = event.data.object;
-          const receive_payment = event.data.object.receipt_url;
-          // llamar nuestro microservicio
-          console.log({
-            metadata: chargeSucceeded.metadata,
-            orderId: chargeSucceeded.metadata.orderId,
-            receive_payment: receive_payment,
-          });
-          break;
-
-        default:
-          console.log(`Event ${event.type} not handled`);
+      if (event.type === 'charge.succeeded') {
+        const chargeSucceeded = event.data.object;
+        // we will call our microservice soon
+        console.log({
+          metadata: chargeSucceeded.metadata,
+          orderId: chargeSucceeded.metadata.orderId,
+          receive_payment: chargeSucceeded.receipt_url,
+        });
+      } else {
+        console.log(`Event ${event.type} not handled`);
       }
     } catch (error) {
       throw new Error(error);
