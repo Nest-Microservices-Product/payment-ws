@@ -40,14 +40,15 @@ export class PaymentsService {
         signature,
         endpointSecret,
       );
-      console.log({ event });
       switch (event.type) {
         case 'charge.succeeded':
           const chargeSucceeded = event.data.object;
+          const receive_payment = event.data.object.receipt_url;
           // llamar nuestro microservicio
           console.log({
             metadata: chargeSucceeded.metadata,
             orderId: chargeSucceeded.metadata.orderId,
+            receive_payment: receive_payment,
           });
           break;
 

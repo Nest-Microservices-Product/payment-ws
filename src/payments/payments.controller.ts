@@ -37,7 +37,7 @@ export class PaymentsController {
         signature,
         rawBody,
       );
-      return res.status(200).json(stripeResponse);
+      return res.status(200).json({stripeResponse});
     } catch (error) {
       return res.status(400).send(`Webhook Error: ${error.message}`);
     }
