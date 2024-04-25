@@ -34,16 +34,28 @@ export class PaymentsService {
 
   async stripeWebhook(signature: string | string[], rawBody: any) {
     try {
-      let event: Stripe.Event;
-      const endpointSecret =
-        'whsec_1f8a7d110228976caae81b3e913f4f5772d61f6146b950c59d34345db00026aa';
-      event = this.stripe.webhooks.constructEvent(
+      const endpointSecret = envs.endpointSecret;
+      const event = this.stripe.webhooks.constructEvent(
         rawBody,
         signature,
         endpointSecret,
       );
+      console.log({ event });
+      switch (event.type) {
+        case 'charge.succeeded':
+          const chargeSucceeded = event.data.object;
+          // llamar nuestro microservicio
+          console.log({
+            metadata: chargeSucceeded.metadata,
+            orderId: chargeSucceeded.metadata.orderId,
+          });
+          break;
+
+        default:
+          console.log(`Event ${event.type} not handled`);
+      }
     } catch (error) {
-        throw new Error(error)
+      throw new Error(error);
     }
   }
 }
