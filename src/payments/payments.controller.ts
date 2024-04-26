@@ -1,8 +1,13 @@
-import { Controller, Get, Post, Req, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Post,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { PaymentSessionDto } from './dto/paymentSession.dto';
-import { Request, Response } from 'express';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { GetRawBody, GetSignature } from './decorators';
 
 @Controller('payments')
 export class PaymentsController {
@@ -30,17 +35,15 @@ export class PaymentsController {
   }
 
   @Post('webhook')
-  async stripeWebHook(@Req() req: Request, @Res() res: Response) {
+  async stripeWebHook(@GetSignature() signature, @GetRawBody() rawBody) {
     try {
-      const signature = req.headers['stripe-signature'];
-      const rawBody = req['rawBody'];
       const stripeResponse = await this.paymentsService.stripeWebhook(
         signature,
         rawBody,
       );
-      return res.status(200).json({ stripeResponse });
+      return stripeResponse;
     } catch (error) {
-      return res.status(400).send(`Webhook Error: ${error.message}`);
+      throw new InternalServerErrorException(error.message);
     }
   }
 }
