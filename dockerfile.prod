@@ -25,7 +25,6 @@ RUN npm run build
 
 RUN npm ci -f --only=production && npm cache clean --force
 
-RUN npx prisma generate
 
 # Create the final image from docker---------------------------------
 FROM node:21-alpine3.19 as prod
