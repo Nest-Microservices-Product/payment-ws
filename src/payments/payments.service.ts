@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { envs } from 'src/config/getEnvs';
 import Stripe from 'stripe';
 import { PaymentSessionDto } from './dto/paymentSession.dto';
@@ -8,6 +8,7 @@ import { ORDERS_SERVICES_NAMES } from 'src/shared/entities/OrdersServicesNames';
 
 @Injectable()
 export class PaymentsService {
+  private readonly logger = new Logger('PaymentsService');
   private readonly stripe = new Stripe(envs.stripeSecret);
   constructor(@Inject(NAST_SERVICE) private readonly client: ClientProxy) {}
   async createPaymentSession(paymentSessionDto: PaymentSessionDto) {
@@ -66,6 +67,8 @@ export class PaymentsService {
         console.log(`Event ${event.type} not handled`);
       }
     } catch (error) {
+      this.logger.error('Error processing Stripe webhook', error);
+      this.logger.error(`Error message: ${error.message}`);
       throw new Error(error);
     }
   }
