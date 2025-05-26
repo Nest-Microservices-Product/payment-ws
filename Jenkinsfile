@@ -7,7 +7,6 @@ pipeline {
         SSH_CRED_ID = 'ssh-key-ec2'
         SSH_CRED_ID_DIEGO = 'ssh-key-ec2-diego'
         STRIPE_SECRET_ID = 'STRIPE_SECRET'
-        ENDPOINT_SECRET_ID = 'endpoint_secret'
         EC2_USER = 'ubuntu'
         REMOTE_PATH = '/home/ubuntu/payment-ws'
     }
@@ -74,11 +73,11 @@ pipeline {
                 script {
                     def envSuffix = env.DEPLOY_ENV
                     def sshKeyId = env.DEPLOY_ENV == 'development' ? SSH_CRED_ID_DIEGO : SSH_CRED_ID
-                    def endpointSecret = "${ENDPOINT_SECRET_ID}_${envSuffix}"
+                    def endpointSecret = "endpoint_secret_${envSuffix}"
                     withCredentials([
                         sshUserPrivateKey(credentialsId: sshKeyId, keyFileVariable: 'SSH_KEY'),
-                        string(credentialsId: endpointSecret, variable: 'STRIPE_SECRET'),
-                        string(credentialsId: ENDPOINT_SECRET_ID, variable: 'ENDPOINT_SECRET')
+                        string(credentialsId: STRIPE_SECRET_ID, variable: 'STRIPE_SECRET'),
+                        string(credentialsId: endpointSecret, variable: 'ENDPOINT_SECRET')
                     ]) {
                         sh 'chmod +x ./deploy.sh'    
                         def branchName = env.GIT_BRANCH.replaceAll('origin/', '')
