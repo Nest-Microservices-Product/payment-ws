@@ -5,6 +5,6 @@ export class HealthCheckController {
     @Get()
     @HttpCode(200)
     healthCheck(): string {
-        return "Payment ms is running!";
+        return "Payment ms is running :D!";
     }
 }
